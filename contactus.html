@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Attendance & Result Portal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #F5F6FA;
+        }
+        .title {
+            color: #0A3D62;
+            font-weight: bold;
+        }
+        .contact-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+        .btn-send {
+            background-color: #0A3D62;
+            color: white;
+        }
+        .btn-send:hover {
+            background-color: #3C6382;
+        }
+        .top-links a {
+            color: #0A3D62;
+            font-weight: 600;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .top-links {
+            text-align: center;
+            margin-top: 15px;
+        }
+        /* Custom Link Style for Contact Info */
+.contact-link {
+    color: inherit;           /* Matches the surrounding text color normally */
+    text-decoration: none;    /* No underline normally */
+    transition: all 0.3s ease; /* Smooth transition effect */
+}
+
+.contact-link:hover {
+    color: #0d6efd;           /* Bright Blue on Hover */
+    text-decoration: underline; /* Underline on Hover */
+    cursor: pointer;
+}
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP NAV LINKS -->
+    <div class="top-links">
+        <a href="index.html">Home</a> | 
+        <a href="register.html">Register</a> | 
+        <a href="login.html">Login</a> |
+        <a href="aboutus.html">About Us</a> 
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="text-center title">Contact Us</h2>
+        <p class="text-center">Feel free to reach out to us!</p>
+
+        <div class="row mt-4">
+            <div class="col-md-7">
+                <div class="contact-box">
+                    <form action="submit_query.php" method="POST">
+
+                        <label>Name</label>
+                        <input type="text" class="form-control mb-3" name="name" required>
+
+                        <label>Email</label>
+                        <input type="email" class="form-control mb-3" name="email" required>
+
+                        <label>Phone Number</label>
+                        <input type="text" class="form-control mb-3" name="phone" required>
+
+                        <label>Your Query</label>
+                        <textarea class="form-control mb-3" name="query" rows="4" required></textarea>
+
+                        <button class="btn btn-send w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+    <div class="contact-box">
+        <h4 class="title">Our Information</h4>
+        
+        <p><strong>Email:</strong> 
+            <a href="mailto:web.project@cust.edu.pk" class="contact-link">
+                web.project@cust.edu.pk
+            </a>
+        </p>
+        
+        <p><strong>Location:</strong> 
+            <a href="https://www.google.com/maps/search/Islamabad,+Pakistan" target="_blank" class="contact-link">
+                Islamabad, Pakistan
+            </a>
+        </p>
+
+        <p><strong>Developed By:</strong></p>
+        <ul>
+            <li>Group Project Team</li>
+            <li>BSSE Students</li>
+            <ol>
+                <li>Ahmed Mujtaba</li>
+                <li>Nauman Manzoor</li>
+                <li>Omer Yar</li>
+            </ol>
+        </ul>
+    </div>
+</div>
+            
+
+        </div>
+    </div>
+</body>
+</html>

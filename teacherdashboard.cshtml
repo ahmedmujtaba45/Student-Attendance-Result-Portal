@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard | Student Portal</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* Animated Gradient Background */
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #0A3D62, #3C6382, #74B9FF);
+        background-size: 400% 400%;
+        animation: gradientBG 20s ease infinite;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+    @keyframes gradientBG {
+        0% {background-position:0% 50%;}
+        50% {background-position:100% 50%;}
+        100% {background-position:0% 50%;}
+    }
+
+    .navbar { background-color: rgba(10,61,98,0.95); }
+    .navbar-brand { color: #ffffff !important; }
+    .btn-light { color: #0A3D62 !important; }
+
+    /* Dashboard Cards */
+    .card {
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        transform: translateY(0);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(8px);
+    }
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+    }
+    .card-title { color: #0A3D62; font-weight: bold; }
+
+    /* Sections */
+    .section { display: none; margin-top: 20px; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+    /* Tables */
+    table { background: rgba(255,255,255,0.95); }
+    th, td { text-align: center; vertical-align: middle; }
+
+    /* Buttons */
+    .btn-primary { background: #0A3D62; border:none; transition: 0.3s; }
+    .btn-primary:hover { background: #3C6382; transform: scale(1.05); }
+
+    /* Modal List Styling */
+    .student-list-container {
+        max-height: 400px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+    }
+</style>
+</head>
+<body>
+
+<script>
+// ---------- LOGIN VALIDATION ----------
+let teacherID = localStorage.getItem("TeacherID");
+let teacherName = localStorage.getItem("Name");
+
+if (!teacherID) {
+    window.location.href = "login.html";
+}
+</script>
+
+<nav class="navbar navbar-dark shadow">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-light me-3 fw-bold border-0" onclick="openProfileModal()">
+                👤 My Profile
+            </button>
+            <span class="navbar-brand mb-0 h1">Teacher Dashboard</span>
+        </div>
+        
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3 d-none d-md-block">Welcome <span id="teacherNameDisplay"></span></span>
+            <button onclick="logout()" class="btn btn-light btn-sm fw-bold">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="modal fade" id="profileModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">My Profile</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="profileForm">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Teacher ID</label>
+                <input type="text" class="form-control bg-light" id="profID" readonly>
+                <small class="text-muted">You cannot change your ID.</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Full Name</label>
+                <input type="text" class="form-control" id="profName">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Email</label>
+                <input type="email" class="form-control" id="profEmail">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Department</label>
+                <input type="text" class="form-control bg-light" id="profDept" readonly>
+                <small class="text-muted">You cannot change your department.</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Password</label>
+                <input type="text" class="form-control" id="profPass">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+    <h3 class="text-white mb-4">Teacher Dashboard</h3>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card p-4 text-center h-100" onclick="showSection('courses')">
+                <h3 class="mb-2">📚</h3>
+                <h5 class="card-title">My Courses</h5>
+                <small class="text-muted">View assigned courses</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 text-center h-100" onclick="showSection('students')">
+                <h3 class="mb-2">👨‍🎓</h3>
+                <h5 class="card-title">Students</h5>
+                <small class="text-muted">View enrolled students</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 text-center h-100" onclick="showSection('attendance')">
+                <h3 class="mb-2">📅</h3>
+                <h5 class="card-title">Attendance</h5>
+                <small class="text-muted">Mark or Edit Attendance</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 text-center h-100" onclick="showSection('results')">
+                <h3 class="mb-2">📄</h3>
+                <h5 class="card-title">Results</h5>
+                <small class="text-muted">Upload or Edit Marks</small>
+            </div>
+        </div>
+    </div>
+
+    <div id="courses" class="section">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h4 class="text-white mb-0">My Assigned Courses</h4>
+            <input type="text" id="searchCourse" class="form-control w-25" placeholder="Search by Name or ID..." onkeyup="filterTable('searchCourse', 'courseTableContainer')">
+        </div>
+        <div id="courseTableContainer"></div>
+    </div>
+
+    <div id="students" class="section">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h4 class="text-white mb-0">Enrolled Students</h4>
+            <input type="text" id="searchStudent" class="form-control w-25" placeholder="Search by Name or ID..." onkeyup="filterTable('searchStudent', 'studentTableContainer')">
+        </div>
+        <div id="studentTableContainer"></div>
+    </div>
+
+    <div id="attendance" class="section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-white mb-0">Attendance History</h4>
+            <div class="d-flex gap-2">
+                <input type="text" id="searchAttendance" class="form-control" placeholder="Search Date, Name..." onkeyup="filterTable('searchAttendance', 'attendanceTable')">
+                <button class="btn btn-light fw-bold text-primary text-nowrap" onclick="openAttendanceModal()">+ Mark Attendance</button>
+            </div>
+        </div>
+        <div id="attendanceTable"></div>
+    </div>
+
+    <div id="results" class="section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-white mb-0">Results History</h4>
+            <div class="d-flex gap-2">
+                <input type="text" id="searchResult" class="form-control" placeholder="Search Subject, Grade..." onkeyup="filterTable('searchResult', 'resultsTable')">
+                <button class="btn btn-light fw-bold text-success text-nowrap" onclick="openResultModal()">+ Add Results</button>
+            </div>
+        </div>
+        <div id="resultsTable"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="attendanceModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Mark / Edit Attendance</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="attendanceForm">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Course</label>
+                    <select class="form-select" id="attCourseSelect" onchange="refreshAttList()">
+                        <option value="">-- Choose Course --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Date</label>
+                    <input type="date" class="form-control" id="attDate" onchange="refreshAttList()">
+                    <small class="text-muted">Select date to load student list.</small>
+                </div>
+            </div>
+            
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Student List</h6>
+                <span id="attStatusMsg" class="badge bg-secondary">Waiting for selection...</span>
+            </div>
+
+            <div id="attStudentList" class="student-list-container p-2">
+                <div class="text-center mt-5 text-muted">
+                    <p>Please select a Course and Date above.</p>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submitAttendance()">Save Attendance</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="resultModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Add / Edit Results</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="resultForm">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Course</label>
+                    <select class="form-select" id="resCourseSelect" onchange="refreshResList()">
+                        <option value="">-- Choose Course --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Exam Title / Subject</label>
+                    <input type="text" class="form-control" id="resSubject" placeholder="e.g. Midterm Spring 24" onblur="refreshResList()">
+                    <small class="text-muted">Type exam name & click outside to load data.</small>
+                </div>
+            </div>
+            
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Student Marks</h6>
+                <span id="resStatusMsg" class="badge bg-secondary">Waiting for selection...</span>
+            </div>
+
+            <div id="resStudentList" class="student-list-container p-2">
+                <div class="text-center mt-5 text-muted">
+                    <p>Please select a Course and enter Exam Name.</p>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" onclick="submitResults()">Save Results</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById("teacherNameDisplay").innerText = teacherName;
+    let myCoursesData = []; // Cache courses for dropdowns
+
+    // --- NAVIGATION ---
+    function showSection(section) {
+        document.querySelectorAll('.section').forEach(sec => sec.style.display='none');
+        document.getElementById(section).style.display='block';
+
+        if(section==='courses') loadCourses();
+        else if(section==='students') loadStudents();
+        else if(section==='attendance') loadAttendance();
+        else if(section==='results') loadResults();
+    }
+
+    // --- LOAD DASHBOARD DATA ---
+    function loadCourses() {
+        fetch("fetch_teacher_courses.php?TeacherID=" + teacherID)
+        .then(res => res.json())
+        .then(data => {
+            myCoursesData = data; // Cache for modals
+            let html = `<table class='table table-hover mt-3'><thead class='table-primary'><tr><th>#</th><th>Course Name</th><th>ID</th></tr></thead><tbody>`;
+            data.forEach((c, i) => html += `<tr><td>${i+1}</td><td>${c.CourseName}</td><td><span class="badge bg-secondary">${c.CourseID}</span></td></tr>`);
+            html += "</tbody></table>";
+            document.getElementById("courseTableContainer").innerHTML = html;
+        });
+    }
+
+    function loadStudents() {
+        fetch("fetch_teacher_students.php?TeacherID=" + teacherID)
+        .then(res => res.json())
+        .then(data => {
+            let html = `<table class='table table-hover mt-3'><thead class='table-primary'><tr><th>#</th><th>Name</th><th>Student ID</th></tr></thead><tbody>`;
+            data.forEach((s, i) => html += `<tr><td>${i+1}</td><td>${s.Name}</td><td>${s.StudentID}</td></tr>`);
+            html += "</tbody></table>";
+            document.getElementById("studentTableContainer").innerHTML = html;
+        });
+    }
+
+    function loadAttendance() {
+        fetch("fetch_teacher_attendance.php?TeacherID=" + teacherID)
+        .then(res => res.text())
+        .then(data => document.getElementById("attendanceTable").innerHTML = data);
+    }
+
+    function loadResults() {
+        fetch("fetch_teacher_results.php?TeacherID=" + teacherID)
+        .then(res => res.text())
+        .then(data => document.getElementById("resultsTable").innerHTML = data);
+    }
+
+    // --- NEW: EDIT AND DELETE FUNCTIONS ---
+    
+    // Triggered by the "Edit" button in Attendance Table
+    function editAttRow(courseID, date) {
+        const modal = new bootstrap.Modal(document.getElementById('attendanceModal'));
+        modal.show();
+
+        // Small delay to ensure modal DOM is ready and courses are cached
+        setTimeout(() => {
+            let dropdown = document.getElementById("attCourseSelect");
+            
+            // Populate dropdown if needed
+            if(dropdown.options.length <= 1 && myCoursesData.length > 0) {
+                dropdown.innerHTML = '<option value="">-- Choose Course --</option>';
+                myCoursesData.forEach(c => { dropdown.innerHTML += `<option value="${c.CourseID}">${c.CourseName}</option>`; });
+            }
+
+            dropdown.value = courseID;
+            document.getElementById("attDate").value = date;
+            
+            // Load the existing data
+            refreshAttList();
+        }, 200);
+    }
+
+    // Triggered by the "Edit" button in Results Table
+    function editResRow(courseID, examTitle) {
+        const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+        modal.show();
+
+        setTimeout(() => {
+            let dropdown = document.getElementById("resCourseSelect");
+            
+            if(dropdown.options.length <= 1 && myCoursesData.length > 0) {
+                dropdown.innerHTML = '<option value="">-- Choose Course --</option>';
+                myCoursesData.forEach(c => { dropdown.innerHTML += `<option value="${c.CourseID}">${c.CourseName}</option>`; });
+            }
+
+            dropdown.value = courseID;
+            document.getElementById("resSubject").value = examTitle;
+
+            // Load existing data
+            refreshResList();
+        }, 200);
+    }
+
+    // Triggered by "Delete" buttons
+    function deleteRow(type, studentID, courseID, identifier) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This record will be permanently deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('delete_teacher_record.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, studentID, courseID, identifier })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        Swal.fire('Deleted!', 'Record has been deleted.', 'success');
+                        if(type === 'attendance') loadAttendance();
+                        if(type === 'result') loadResults();
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    // --- STANDARD MODAL OPENERS ---
+
+    function openAttendanceModal() {
+        if(myCoursesData.length === 0) loadCourses(); 
+        
+        let dropdown = document.getElementById("attCourseSelect");
+        if (dropdown.options.length <= 1) {
+            dropdown.innerHTML = '<option value="">-- Choose Course --</option>';
+            myCoursesData.forEach(c => { dropdown.innerHTML += `<option value="${c.CourseID}">${c.CourseName}</option>`; });
+        }
+
+        document.getElementById("attDate").valueAsDate = new Date();
+        document.getElementById("attStudentList").innerHTML = '<p class="text-muted text-center mt-3">Select a Course above to begin.</p>';
+        document.getElementById("attStatusMsg").innerText = "Waiting...";
+        
+        new bootstrap.Modal(document.getElementById('attendanceModal')).show();
+    }
+
+    function openResultModal() {
+        if(myCoursesData.length === 0) loadCourses(); 
+
+        let dropdown = document.getElementById("resCourseSelect");
+        dropdown.innerHTML = '<option value="">-- Choose Course --</option>';
+        myCoursesData.forEach(c => { dropdown.innerHTML += `<option value="${c.CourseID}">${c.CourseName}</option>`; });
+
+        document.getElementById("resSubject").value = "";
+        document.getElementById("resStudentList").innerHTML = '<p class="text-muted text-center mt-5">Select Course and type Exam Name.</p>';
+        document.getElementById("resStatusMsg").innerText = "Waiting...";
+
+        new bootstrap.Modal(document.getElementById('resultModal')).show();
+    }
+
+    // --- REFRESH FUNCTIONS ---
+    function refreshAttList() {
+        const courseID = document.getElementById('attCourseSelect').value;
+        const date = document.getElementById('attDate').value;
+
+        if (!courseID) return;
+
+        document.getElementById("attStudentList").innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p>Validating Time Slot...</p></div>';
+
+        // Validate Time Slot First
+        // We append &Date=${date} to the URL
+        fetch(`validate_class_time.php?TeacherID=${teacherID}&CourseID=${courseID}&Date=${date}`)
+        .then(res => res.json())
+        .then(validation => {
+            if (validation.status === 'error') {
+                Swal.fire({
+                    icon: 'error', title: 'Access Denied',
+                    text: validation.message
+                });
+                document.getElementById("attStudentList").innerHTML = `<div class="alert alert-danger text-center m-3">⛔ ${validation.message}</div>`;
+                document.getElementById("attCourseSelect").value = ""; 
+                return;
+            }
+
+            if (courseID && date) {
+                loadStudentsForModal(courseID, 'attStudentList', false, date, null);
+            }
+        })
+        .catch(err => {
+            document.getElementById("attStudentList").innerHTML = '<p class="text-danger text-center">System Error Validating Time.</p>';
+        });
+    }
+
+    function refreshResList() {
+        const courseID = document.getElementById('resCourseSelect').value;
+        const subject = document.getElementById('resSubject').value;
+        if (courseID && subject) {
+            loadStudentsForModal(courseID, 'resStudentList', true, null, subject);
+        }
+    }
+
+    // --- CORE FETCH LOGIC ---
+    function loadStudentsForModal(courseID, containerId, isResultMode, date = null, subject = null) {
+        let url = `fetch_students_by_course.php?CourseID=${courseID}`;
+        if (date) url += `&Date=${date}`;
+        if (subject) url += `&Subject=${encodeURIComponent(subject)}`;
+
+        fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            let html = "";
+            let statusBadge = isResultMode ? "resStatusMsg" : "attStatusMsg";
+            let statusText = "New Entry";
+            let statusClass = "bg-primary";
+
+            if(data.length === 0) {
+                html = "<p class='text-danger text-center mt-3'>No students enrolled.</p>";
+                document.getElementById(statusBadge).className = "badge bg-danger";
+                document.getElementById(statusBadge).innerText = "No Students";
+            } else {
+                if (data[0].ExistingStatus || data[0].ExistingMarks) {
+                    statusText = "Editing Saved Data";
+                    statusClass = "bg-warning text-dark";
+                }
+
+                html += `<table class="table table-sm table-hover align-middle"><thead class="table-light sticky-top"><tr><th>ID</th><th>Name</th><th style="width:180px">${isResultMode ? 'Marks' : 'Status'}</th></tr></thead><tbody>`;
+                
+                let currentDept = "";
+                data.forEach(s => {
+                    let deptPrefix = s.StudentID.substring(0, 3).toUpperCase(); 
+                    if (isNaN(deptPrefix) && deptPrefix !== currentDept) {
+                        currentDept = deptPrefix;
+                        html += `<tr class="table-secondary"><td colspan="3" class="fw-bold ps-3 text-start small">DEPARTMENT: ${currentDept}</td></tr>`;
+                    }
+
+                    html += `<tr><td><small>${s.StudentID}</small></td><td>${s.Name}</td><td>`;
+                    
+                    if (isResultMode) {
+                        let val = s.ExistingMarks !== null ? s.ExistingMarks : "";
+                        let grd = s.ExistingGrade !== null ? s.ExistingGrade : "A"; 
+                        html += `<div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" placeholder="0" name="marks_${s.StudentID}" value="${val}" min="0" max="100">
+                                    <select class="form-select" name="grade_${s.StudentID}">
+                                        <option value="A" ${grd=='A'?'selected':''}>A</option>
+                                        <option value="B" ${grd=='B'?'selected':''}>B</option>
+                                        <option value="C" ${grd=='C'?'selected':''}>C</option>
+                                        <option value="D" ${grd=='D'?'selected':''}>D</option>
+                                        <option value="F" ${grd=='F'?'selected':''}>F</option>
+                                    </select>
+                                 </div>`;
+                    } else {
+                        let st = s.ExistingStatus; 
+                        let pChk = (st === 'Present' || st === null) ? 'checked' : ''; 
+                        let aChk = (st === 'Absent') ? 'checked' : '';
+                        let lChk = (st === 'Late') ? 'checked' : '';
+                        html += `<div class="btn-group btn-group-sm w-100" role="group">
+                                    <input type="radio" class="btn-check" name="status_${s.StudentID}" id="p_${s.StudentID}" value="Present" ${pChk}><label class="btn btn-outline-success" for="p_${s.StudentID}">P</label>
+                                    <input type="radio" class="btn-check" name="status_${s.StudentID}" id="a_${s.StudentID}" value="Absent" ${aChk}><label class="btn btn-outline-danger" for="a_${s.StudentID}">A</label>
+                                    <input type="radio" class="btn-check" name="status_${s.StudentID}" id="l_${s.StudentID}" value="Late" ${lChk}><label class="btn btn-outline-warning" for="l_${s.StudentID}">L</label>
+                                 </div>`;
+                    }
+                    html += `</td></tr>`;
+                });
+                html += `</tbody></table>`;
+                document.getElementById(statusBadge).className = "badge " + statusClass;
+                document.getElementById(statusBadge).innerText = statusText;
+            }
+            document.getElementById(containerId).innerHTML = html;
+        });
+    }
+
+    // --- SUBMIT FUNCTIONS ---
+    function submitAttendance() {
+        const courseID = document.getElementById('attCourseSelect').value;
+        const date = document.getElementById('attDate').value;
+        if(!courseID || !date) { Swal.fire('Error', 'Please select course and date', 'error'); return; }
+
+        let students = [];
+        document.querySelectorAll('#attStudentList tbody tr').forEach(row => {
+            if(row.classList.contains('table-secondary')) return;
+            let sid = row.cells[0].innerText;
+            let checkedRadio = document.querySelector(`input[name="status_${sid}"]:checked`);
+            if(checkedRadio) students.push({ studentID: sid, status: checkedRadio.value });
+        });
+
+        sendData({ type: 'attendance', courseID, teacherID, date, data: students });
+    }
+
+    function submitResults() {
+        const courseID = document.getElementById('resCourseSelect').value;
+        const subject = document.getElementById('resSubject').value;
+        if(!courseID || !subject) { Swal.fire('Error', 'Please select course and enter exam name', 'error'); return; }
+
+        let students = [];
+        document.querySelectorAll('#resStudentList tbody tr').forEach(row => {
+            if(row.classList.contains('table-secondary')) return;
+            let sid = row.cells[0].innerText;
+            let marksInput = document.querySelector(`input[name="marks_${sid}"]`);
+            let gradeInput = document.querySelector(`select[name="grade_${sid}"]`);
+            if(marksInput && marksInput.value !== "") {
+                students.push({ studentID: sid, marks: marksInput.value, grade: gradeInput.value });
+            }
+        });
+
+        if(students.length === 0) { Swal.fire('Warning', 'No marks entered', 'warning'); return; }
+        sendData({ type: 'result', courseID, teacherID, subject, data: students });
+    }
+
+    function sendData(payload) {
+        Swal.fire({title: 'Saving...', didOpen: () => Swal.showLoading()});
+        fetch('submit_teacher_data.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                Swal.fire('Success', data.message, 'success').then(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('attendanceModal'))?.hide();
+                    bootstrap.Modal.getInstance(document.getElementById('resultModal'))?.hide();
+                    if(payload.type === 'attendance') loadAttendance();
+                    if(payload.type === 'result') loadResults();
+                });
+            } else { Swal.fire('Error', data.message, 'error'); }
+        });
+    }
+
+    // --- PROFILE FUNCTIONS ---
+    function openProfileModal() {
+        fetch(`fetch_teacher_profile.php?TeacherID=${teacherID}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) { Swal.fire('Error', 'Could not load profile', 'error'); return; }
+            document.getElementById('profID').value = data.TeacherID;
+            document.getElementById('profName').value = data.Name;
+            document.getElementById('profEmail').value = data.Email;
+            document.getElementById('profDept').value = data.DeptName || data.Department || "Not Assigned"; 
+            document.getElementById('profPass').value = data.Password;
+            new bootstrap.Modal(document.getElementById('profileModal')).show();
+        });
+    }
+
+    function updateProfile() {
+        const payload = {
+            TeacherID: document.getElementById('profID').value,
+            Name: document.getElementById('profName').value,
+            Email: document.getElementById('profEmail').value,
+            Password: document.getElementById('profPass').value
+        };
+
+        fetch('update_teacher_profile.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                Swal.fire('Success', 'Profile Updated!', 'success').then(() => {
+                    localStorage.setItem("Name", payload.Name);
+                    document.getElementById("teacherNameDisplay").innerText = payload.Name;
+                    bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+                });
+            } else { Swal.fire('Error', data.message, 'error'); }
+        });
+    }
+
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+    function filterTable(inputId, tableContainerId) {
+        let input = document.getElementById(inputId);
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById(tableContainerId).querySelector("table");
+        if (!table) return;
+        let tr = table.getElementsByTagName("tr");
+        for (let i = 1; i < tr.length; i++) {
+            let rowContent = tr[i].textContent || tr[i].innerText;
+            tr[i].style.display = rowContent.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        }
+    }
+
+    // Initial Load
+    loadCourses();
+
+</script>
+</body>
+</html>

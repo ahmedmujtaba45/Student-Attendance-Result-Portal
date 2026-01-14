@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | University Portal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+<style>
+    /* Background Gradient Animation */
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(-45deg, #0A3D62, #3C6382, #74B9FF, #82CCDD);
+        background-size: 400% 400%;
+        animation: gradientBG 20s ease infinite;
+        overflow: hidden;
+    }
+    @keyframes gradientBG {
+        0% {background-position:0% 50%;}
+        50% {background-position:100% 50%;}
+        100% {background-position:0% 50%;}
+    }
+
+    /* Floating particles */
+    canvas#particlesCanvas {
+        position: absolute;
+        top:0; left:0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    /* Login Card */
+    .login-container {
+        position: relative;
+        z-index: 2;
+        width: 380px;
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        opacity: 0;
+        transform: translateY(-30px);
+        animation: slideFade 1s forwards;
+    }
+    @keyframes slideFade {
+        to { opacity: 1; transform: translateY(0);}
+    }
+
+    .login-title {
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+        color: #0A3D62;
+    }
+
+    .btn-login {
+        background-color: #0A3D62;
+        color: white;
+        transition: 0.3s all;
+    }
+    .btn-login:hover {
+        background-color: #3C6382;
+        transform: scale(1.03);
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #0A3D62;
+        box-shadow: 0 0 8px rgba(10,61,98,0.4);
+        transition: 0.3s;
+    }
+
+    /* Top Nav */
+    .top-links {
+        position: absolute;
+        top: 15px;
+        width: 100%;
+        text-align: center;
+        z-index: 2;
+    }
+    .top-links a {
+        color: #ffffff;
+        font-weight: 600;
+        margin: 0 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .top-links a:hover { color: #ffd700; }
+</style>
+</head>
+<body>
+
+<canvas id="particlesCanvas"></canvas>
+
+<div class="top-links">
+    <a href="index.html">Home</a> | 
+    <a href="register.html">Register</a> |
+    <a href="contactus.html">Contact Us</a> |
+    <a href="aboutus.html">About Us</a>
+    
+</div>
+
+<div class="login-container">
+    <h3 class="login-title">University Portal Login</h3>
+    <hr>
+
+    <form id="loginForm">
+
+        <label>Select Role</label>
+        <select name="role" id="role" class="form-control mb-3" required>
+            <option value="">Choose Role</option>
+            <option value="admin">Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+        </select>
+
+        <label>Email</label>
+        <input type="email" class="form-control mb-3" name="email" id="email" placeholder="Enter your email" required>
+
+        <label>Password</label>
+        <div class="input-group mb-3">
+            <input type="password" id="password" class="form-control" name="password" placeholder="Password" required>
+            <span class="input-group-text" style="cursor:pointer" onclick="togglePassword()">👁</span>
+        </div>
+
+        <button type="submit" class="btn btn-login w-100">Login</button>
+    </form>
+</div>
+
+<script>
+// Password toggle
+function togglePassword() {
+    const x = document.getElementById("password");
+    x.type = x.type === "password" ? "text" : "password";
+}
+
+// Particle animation
+const canvas = document.getElementById('particlesCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+class Particle {
+    constructor(){
+        this.x = Math.random()*canvas.width;
+        this.y = Math.random()*canvas.height;
+        this.size = Math.random()*3 + 1;
+        this.speedX = Math.random()*0.5 - 0.25;
+        this.speedY = Math.random()*0.5 - 0.25;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function initParticles() {
+    particlesArray = [];
+    for(let i=0; i<80; i++){
+        particlesArray.push(new Particle());
+    }
+}
+initParticles();
+
+function animateParticles(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particlesArray.forEach(p=>{
+        p.update();
+        p.draw();
+    });
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+window.addEventListener('resize', ()=>{
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initParticles();
+});
+
+// Login fetch
+document.getElementById("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("login.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status==="success"){
+            if(data.role==="admin") window.location.href="admindashboard.cshtml";
+            else if(data.role==="teacher"){
+                localStorage.setItem("TeacherID", data.id);
+                localStorage.setItem("Name", data.name);
+                window.location.href="teacherdashboard.cshtml";
+            }
+            else if(data.role==="student"){
+                localStorage.setItem("StudentID", data.id);
+                localStorage.setItem("Name", data.name);
+                window.location.href="studentdashboard.cshtml";
+            }
+        } else alert("Invalid Email or Password!");
+    })
+    .catch(err => alert("Server error: "+err));
+});
+</script>
+
+</body>
+</html>

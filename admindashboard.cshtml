@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Student Portal</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body { background-color: #F5F6FA; font-family: Arial, sans-serif; }
+    .navbar { background-color: #0A3D62; }
+    .navbar-brand { color: #ffffff !important; }
+    .btn-light { color: #000000 !important; }
+    .card { border-radius: 12px; cursor: pointer; transition: 0.3s; }
+    .card:hover { transform: scale(1.05); }
+    .card-title { color: #0A3D62; font-weight: bold; }
+    .section { display: none; margin-top: 20px; }
+    .section h4 { color: #0A3D62; border-bottom: 2px solid #0A3D62; padding-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark">
+    <div class="container">
+        <span class="navbar-brand">Admin Dashboard</span>
+        <a href="login.html" class="btn btn-light btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h3>Welcome Admin</h3>
+
+    <div class="row g-4 mt-4">
+        <div class="col-md-4"><div class="card p-4 text-center" onclick="showSection('students')">
+            <h5 class="card-title">Manage Students</h5><p>Add, edit or delete students</p>
+        </div></div>
+        <div class="col-md-4"><div class="card p-4 text-center" onclick="showSection('teachers')">
+            <h5 class="card-title">Manage Teachers</h5><p>Add, edit or delete teachers</p>
+        </div></div>
+        <div class="col-md-4"><div class="card p-4 text-center" onclick="showSection('courses')">
+            <h5 class="card-title">Manage Courses</h5><p>Add courses & Assign to students</p>
+        </div></div>
+        <div class="col-md-4"><div class="card p-4 text-center" onclick="showSection('reports')">
+            <h5 class="card-title">Manage Reports</h5><p>View attendance & results</p>
+        </div></div>
+        <div class="col-md-4"><div class="card p-4 text-center" onclick="showSection('queries')">
+            <h5 class="card-title">Manage Queries</h5><p>View user contact queries</p>
+        </div></div>
+    </div>
+
+    <div id="students" class="section">
+        <h4>Students</h4>
+        <input type="text" class="form-control mb-2" id="studentSearch" placeholder="Search by ID or Name..." onkeyup="searchTable('studentTable', 'studentSearch')">
+        <button class="btn btn-primary mb-2" onclick="openStudentModal()">Add Student</button>
+        <div id="studentTable"></div>
+    </div>
+
+    <div id="teachers" class="section">
+        <h4>Teachers</h4>
+        <input type="text" class="form-control mb-2" id="teacherSearch" placeholder="Search by ID, Name, Department..." onkeyup="searchTable('teacherTable', 'teacherSearch')">
+        <button class="btn btn-primary mb-2" onclick="openTeacherModal()">Add Teacher</button>
+        <div id="teacherTable"></div>
+    </div>
+
+    <div id="courses" class="section">
+        <h4>Courses</h4>
+        <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-primary" onclick="openAddCourseModal()">+ Add New Course</button>
+            <button class="btn btn-success" onclick="openAssignCourseModal()">+ Assign Course to Student</button>
+        </div>
+        <input type="text" class="form-control mb-2" id="courseSearch" placeholder="Search Course Name or ID..." onkeyup="searchTable('courseTable', 'courseSearch')">
+        <div id="courseTable"></div>
+    </div>
+
+    <div id="reports" class="section">
+        <h4>Reports</h4>
+        <div class="mb-3">
+            <button class="btn btn-primary me-2" onclick="showReport('results')">Manage Results</button>
+            <button class="btn btn-secondary" onclick="showReport('attendance')">Manage Attendance</button>
+        </div>
+        <input type="text" class="form-control mb-2" id="resultsSearch" placeholder="Search by Student, Course..." onkeyup="searchTable('resultsTable', 'resultsSearch')" style="display:none;">
+        <div id="resultsTable" style="display:none;"></div>
+        <input type="text" class="form-control mb-2" id="attendanceSearch" placeholder="Search by Student, Subject, Status..." onkeyup="searchTable('attendanceTable', 'attendanceSearch')" style="display:none;">
+        <div id="attendanceTable" style="display:none;"></div>
+    </div>
+
+    <div id="queries" class="section">
+        <h4>User Queries</h4>
+         <input type="text" class="form-control mb-2" id="querySearch" placeholder="Search by Name, Email or Phone..." onkeyup="searchTable('queryTable', 'querySearch')">
+        <div id="queryTable"></div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="studentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="studentForm" method="POST" action="add_student.php">
+        <div class="modal-header">
+          <h5 class="modal-title" id="studentModalTitle">Add Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label>ID</label><input type="text" class="form-control" name="StudentID" id="StudentID" required></div>
+          <div class="mb-3"><label>Name</label><input type="text" class="form-control" name="Name" id="StudentName" required></div>
+          <div class="mb-3"><label>Email</label><input type="email" class="form-control" name="Email" id="StudentEmail" required></div>
+          <div class="mb-3"><label>Password</label><input type="text" class="form-control" name="Password" id="StudentPassword" required></div>
+          <div class="mb-3"><label>Department</label>
+            <select class="form-select" name="Department" id="StudentDept" required>
+                <option value="" selected disabled>Select Department</option>
+                <option value="Software Engineering">Software Engineering</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Business Admin">Business Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="teacherModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="teacherForm" method="POST" action="add_teacher.php">
+        <div class="modal-header">
+          <h5 class="modal-title" id="teacherModalTitle">Add Teacher</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label>ID</label><input type="text" class="form-control" name="TeacherID" id="TeacherID" required></div>
+          <div class="mb-3"><label>Name</label><input type="text" class="form-control" name="Name" id="TeacherName" required></div>
+          <div class="mb-3"><label>Email</label><input type="email" class="form-control" name="Email" id="TeacherEmail" required></div>
+          <div class="mb-3"><label>Password</label><input type="text" class="form-control" name="Password" id="TeacherPassword" required></div>
+          <div class="mb-3"><label>Department</label>
+            <select class="form-select" name="Department" id="TeacherDept" required>
+                <option value="" selected disabled>Select Department</option>
+                <option value="Software Engineering">Software Engineering</option>
+                <option value="Computer Science">Computer Science</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addCourseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addCourseForm" method="POST" action="add_course.php">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Add New Course</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Course ID</label>
+            <input type="number" class="form-control" name="CourseID" placeholder="e.g. 101" required>
+          </div>
+          <div class="mb-3">
+            <label>Course Name</label>
+            <input type="text" class="form-control" name="CourseName" placeholder="e.g. Web Development" required>
+          </div>
+          <div class="mb-3">
+            <label>Department ID</label>
+            <select class="form-select" name="DeptID" required>
+                <option value="" selected disabled>Select Dept ID</option>
+                <option value="SE">SE (Software Eng)</option>
+                <option value="CS">CS (Computer Sci)</option>
+                <option value="BBA">BBA (Business)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Add Course</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="assignCourseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="assignCourseForm" method="POST" action="assign_course.php">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Assign Course to Student</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          
+          <div class="mb-3">
+            <label>Select Student</label>
+            <select class="form-select" name="StudentID" id="assignStudentSelect" required>
+                <option value="" selected disabled>Loading students...</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label>Course ID</label>
+            <input type="number" class="form-control" name="CourseID" placeholder="Enter Course ID" required>
+            <small class="text-muted">Ensure this Course ID exists in the system.</small>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-success">Assign</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function showSection(section) {
+    document.querySelectorAll('.section').forEach(sec => sec.style.display='none');
+    document.getElementById(section).style.display='block';
+
+    if(section==='students') loadStudents();
+    else if(section==='teachers') loadTeachers();
+    else if(section==='courses') loadCourses(); 
+    else if(section==='reports') showReport('results');
+    else if (section === 'queries') loadQueries();
+}
+
+// Open Modals
+function openStudentModal() { new bootstrap.Modal(document.getElementById('studentModal')).show(); }
+function openTeacherModal() { new bootstrap.Modal(document.getElementById('teacherModal')).show(); }
+function openAddCourseModal() { new bootstrap.Modal(document.getElementById('addCourseModal')).show(); }
+
+// Assign Course Modal - Loads Students First
+function openAssignCourseModal() { 
+    new bootstrap.Modal(document.getElementById('assignCourseModal')).show();
+    loadStudentDropdown(); 
+}
+
+// Load Data
+function loadStudents(){ fetch('fetch_students.php').then(res=>res.text()).then(data=>document.getElementById('studentTable').innerHTML=data); }
+function loadTeachers(){ fetch('fetch_teachers.php').then(res=>res.text()).then(data=>document.getElementById('teacherTable').innerHTML=data); }
+function loadCourses(){ fetch('fetch_courses.php').then(res=>res.text()).then(data=>document.getElementById('courseTable').innerHTML=data); }
+function loadQueries(){ fetch('fetch_queries.php').then(res=>res.text()).then(data=>document.getElementById('queryTable').innerHTML=data); }
+
+// New: Fetch Students for Dropdown
+function loadStudentDropdown() {
+    fetch('fetch_students_list.php')
+    .then(res => res.json())
+    .then(data => {
+        let dropdown = document.getElementById("assignStudentSelect");
+        dropdown.innerHTML = '<option value="" selected disabled>-- Select a Student --</option>';
+        if(data.length === 0) {
+            dropdown.innerHTML += '<option disabled>No students found</option>';
+        } else {
+            data.forEach(student => {
+                dropdown.innerHTML += `<option value="${student.StudentID}">${student.Name} (${student.StudentID})</option>`;
+            });
+        }
+    });
+}
+
+// Reports
+function showReport(type){
+    document.getElementById('resultsTable').style.display='none';
+    document.getElementById('attendanceTable').style.display='none';
+    document.getElementById('resultsSearch').style.display='none';
+    document.getElementById('attendanceSearch').style.display='none';
+
+    if(type==='results'){
+        document.getElementById('resultsTable').style.display='block';
+        document.getElementById('resultsSearch').style.display='block';
+        fetch('fetch_results.php').then(res=>res.text()).then(data=>document.getElementById('resultsTable').innerHTML=data);
+    } else if(type==='attendance'){
+        document.getElementById('attendanceTable').style.display='block';
+        document.getElementById('attendanceSearch').style.display='block';
+        fetch('fetch_attendance.php').then(res=>res.text()).then(data=>document.getElementById('attendanceTable').innerHTML=data);
+    }
+}
+
+// Search Logic
+function searchTable(tableId, inputId) {
+    let input = document.getElementById(inputId);
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById(tableId);
+    let rows = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < rows.length; i++) {
+        let cells = rows[i].getElementsByTagName("td");
+        let found = false;
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].innerText.toUpperCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        rows[i].style.display = found ? "" : "none";
+    }
+}
+</script>
+
+</body>
+</html>

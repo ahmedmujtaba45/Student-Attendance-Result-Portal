@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Attendance and Result Portal</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #0A3D62;
+            color: white;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 5px;
+            background-color: #0A3D62;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: #0A3D62;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;             /* Needed for overlay */
+            padding: 40px;
+            text-align: center;
+            min-height: 500px;
+            color: white;
+            overflow: hidden;               /* Ensures overlay stays within content */
+            
+            /* Added Flexbox to center the Heading Vertically and Horizontally */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* Background image with 50% opacity */
+        .content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("Images/BGImage.jpg"); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.5;                   /* 50% opacity */
+            z-index: -1;                    /* Puts it behind content */
+        }
+
+        /* Styling for the Main Welcome Heading */
+        .content h1 {
+            font-size: 4em; /* Makes the text larger */
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds shadow for readability */
+        }
+
+        /* Footer */
+        .footer {
+            background-color: white;
+            color: #0A3D62;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Student Attendance and Result Portal</h1>
+    </div>
+
+    <div class="navbar">
+        <a href="register.html">Register</a> |
+        <a href="login.html">Login</a> |
+        <a href="aboutus.html">About Us</a> |
+        <a href="contactus.html">Contact Us</a>
+    </div>
+
+    <div class="content">
+        <h1>Welcome to Student Attendance & Result Portal</h1>
+    </div>
+
+    <div class="footer">
+        © 2026 Student Attendance and Result Portal
+    </div>
+
+</body>
+</html>

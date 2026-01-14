@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Student Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        /* Animated Background */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Particle Canvas */
+        #particles {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* --- NAVIGATION HEADER --- */
+        .navbar-custom {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .navbar-custom .logo {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .navbar-custom .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .navbar-custom .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .navbar-custom .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* Underline animation for links */
+        .navbar-custom .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #248be5;
+            transition: width 0.3s;
+        }
+
+        .navbar-custom .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Glassmorphism Card */
+        .register-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            animation: slideUp 0.8s ease-out;
+            margin-top: 60px; /* Offset for navbar */
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            background: #2a5298;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-register:hover {
+            background: #248be5;
+            transform: scale(1.05);
+        }
+
+        h2 { color: #fff; text-align: center; margin-bottom: 25px; font-weight: 700; }
+        .login-link { text-align: center; color: rgba(255,255,255,0.8); margin-top: 15px; }
+        .login-link a { color: #ffeaa7; text-decoration: none; font-weight: bold; }
+
+        #deptSection { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <canvas id="particles"></canvas>
+
+    <header class="navbar-custom">
+        <a href="index.html" class="logo">StudentPortal</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="login.html">Login</a>
+            <a href="contactus.html">Contact Us</a>
+            <a href="aboutus.html">About Us</a>
+        </div>
+    </header>
+
+    <div class="register-card">
+        <h2>Create Account</h2>
+        <form id="registerForm">
+            
+            <select class="form-select" id="role" name="role" required onchange="toggleFields()">
+                <option value="" selected disabled>Select Role</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+
+            <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+            <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+            <input type="password" class="form-control" name="password" placeholder="Password" required>
+
+            <div id="deptSection">
+                <select class="form-select" name="department" id="deptSelect">
+                    <option value="" selected disabled>Loading Departments...</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-register">Register Now</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // --- 1. Fetch Departments from Database on Load ---
+        function loadDepartments() {
+            fetch('fetch_departments.php')
+            .then(response => response.json())
+            .then(data => {
+                const deptSelect = document.getElementById('deptSelect');
+                // Reset dropdown
+                deptSelect.innerHTML = '<option value="" selected disabled>Select Department</option>';
+                
+                // Populate options
+                data.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.DeptID; // Value sent to DB (e.g. "SE")
+                    option.textContent = dept.DeptName; // Text shown to user (e.g. "Software Engineering")
+                    deptSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading departments:', error);
+                document.getElementById('deptSelect').innerHTML = '<option value="" disabled>Error loading departments</option>';
+            });
+        }
+
+        // Call immediately when page loads
+        window.addEventListener('DOMContentLoaded', loadDepartments);
+
+
+        // Toggle Department Field
+        function toggleFields() {
+            const role = document.getElementById('role').value;
+            const deptSection = document.getElementById('deptSection');
+            const deptInput = document.getElementById('deptSelect');
+
+            if (role === 'teacher' || role === 'student') {
+                deptSection.style.display = 'block';
+                deptInput.setAttribute('required', 'true');
+            } else {
+                deptSection.style.display = 'none';
+                deptInput.removeAttribute('required');
+            }
+        }
+
+        // Handle Form Submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+
+            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
+
+            fetch('register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registration Successful!',
+                        text: data.message, 
+                        confirmButtonText: 'Go to Login'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'login.html';
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Something went wrong!', 'error');
+            });
+        });
+
+        // Particle Animation Logic
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = 'rgba(255, 255, 255, 0.4)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        function initParticles() {
+            particlesArray = [];
+            for (let i = 0; i < 80; i++) particlesArray.push(new Particle());
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesArray.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+            initParticles(); 
+        });
+    </script>
+</body>
+</html>
